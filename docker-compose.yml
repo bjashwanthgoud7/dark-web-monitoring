@@ -1,0 +1,24 @@
+# docker-compose.yml - Multi-container setup (Tor + Scraper + MongoDB)
+version: '3.8'
+services:
+  tor:
+    image: dperson/torproxy
+    container_name: tor_proxy
+    restart: always
+    ports:
+      - "9050:9050"
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+  scraper:
+    build: .
+    container_name: darkweb_scraper
+    depends_on:
+      - tor
+      - mongodb
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/
+    command: ["python", "collect_data.py"]
